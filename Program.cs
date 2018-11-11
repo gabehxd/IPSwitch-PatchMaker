@@ -13,19 +13,20 @@ namespace IPSwitch_PatchMaker
             if (args.Length != 4)
             {
                 Console.WriteLine("Usage: IPSwitch-PatchMaker.exe [name of patch] [unpatched NSO] [patched NSO] [save location]");
+				return;
             }
 
             string patchname = args[0];
-            FileInfo unpatchednsoPath = new FileInfo(args[1]);
-            FileInfo patchednsoPath = new FileInfo(args[2]);
-            FileInfo save = new FileInfo(args[3]);
+			
+            FileInfo unpatchednsoPath = new FileInfo(args[1]),
+					 patchednsoPath   = new FileInfo(args[2]), 
+					 save             = new FileInfo(args[3]);
 
-            using (FileStream patchedstream = new FileStream(patchednsoPath.FullName, FileMode.Open))
-            using (FileStream unpatchedstream = new FileStream(unpatchednsoPath.FullName, FileMode.Open))
+            using (var patchedstream   = File.OpenRead(patchednsoPath.FullName))
+            using (var unpatchedstream = File.OpenRead(unpatchednsoPath.FullName))
             {
-                Nso unpatchedNso = new Nso(unpatchedstream);
-                Nso patchedNso = new Nso(patchedstream);
-
+                var unpatchedNso = new Nso(unpatchedstream);
+                var patchedNso   = new Nso(patchedstream);
 
                 if (patchedNso.Sections.Length != unpatchedNso.Sections.Length)
                 {
@@ -38,19 +39,58 @@ namespace IPSwitch_PatchMaker
                     $"//{patchname}",
                     "@enabled"
                 };
+				
+				bool apply = false;
+                string patch, offset, fullpatch = string.Empty, fulloffset = string.Empty;
+                int combine = 0, lastindex, combinelast;
+				
                 for (int i = 0; i < unpatchedNso.Sections.Length; i++)
                 {
-                    NsoSection unpatchedSection = unpatchedNso.Sections[i];
-                    NsoSection patchedSection = patchedNso.Sections[i];
-                    byte[] unpatchedData = unpatchedSection.DecompressSection();
-                    byte[] patchedData = patchedSection.DecompressSection();
+                    NsoSection unpatchedSection = unpatchedNso.Sections[i],
+							   patchedSection   = patchedNso.Sections[i];
+					
+                    byte[] unpatchedData = unpatchedSection.DecompressSection(), 
+						   patchedData   = patchedSection.DecompressSection();
 
                     for (int index = 0; index < patchedData.Length; index++)
-                        if (patchedData[index] != unpatchedData[index])
+                    if (patchedData[index] != unpatchedData[index])
+                    {
+                        offset = $"{index:X8}";
+                        patch = $"{patchedData[index]:X2}";
+
+                        //get the last index
+                        lastindex = index - 1;
+
+                        if (!apply && index - 1 == lastindex)
                         {
-                            patcharraylist.Add(string.Format("{0:X8} {1:X2}", index, patchedData[index]));
+                            fullpatch = string.Empty;
+                            fulloffset = offset;
+                            apply = true;
                         }
+
+                        if (index - 1 == lastindex)
+                        {
+                            fullpatch += patch;
+                            combine = combine + 1; 
+                        }
+
+                        if (!apply && combine == 0) patcharraylist.Add($"{offset} {patch}");
+
+                        //check if apply is true and index is lastindex
+                        combinelast = 1 - combine;
+						
+                        if (apply && combine > combinelast)
+                        {
+                            //apply combined offset & patch and reset
+                            patcharraylist.Add($"{fulloffset} {fullpatch}");
+                            apply = false;
+                            fullpatch = "";
+                            fulloffset = "";
+                            combine = 0;
+                        }
+                    }
                 }
+				
                 File.WriteAllLines(save.FullName, patcharraylist);
             }
         }
