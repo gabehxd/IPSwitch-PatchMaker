@@ -3,5 +3,5 @@
 Creates a plain text patch for use with [IPSwitch](https://github.com/3096/ipswitch) using two NSO (compressed or uncompressed)
 
 # Known Issues
-* Can only print 2 byte for an offset
+* Can only print 1 byte for an offset
 * Expects NSO sizes to be the same
