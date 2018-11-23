@@ -30,7 +30,7 @@ namespace IPSwitch_PatchMaker
 
                 if (patchedNso.Sections.Length != unpatchedNso.Sections.Length)
                 {
-                    Console.WriteLine("The NSO section Lengths do not match (NSO comes from a diffrent application?)");
+                    Console.WriteLine("The NSO section lengths do not match (NSO comes from a diffrent application?)");
                     return;
                 }
 
@@ -39,10 +39,8 @@ namespace IPSwitch_PatchMaker
                     $"//{patchname}",
                     "@enabled"
                 };
-				
-				bool apply = false;
-                string patch, offset, fullpatch = string.Empty, fulloffset = string.Empty;
-                int combine = 0, lastindex, combinelast;
+
+                string patch, offset = string.Empty;
 				
                 for (int i = 0; i < unpatchedNso.Sections.Length; i++)
                 {
@@ -53,45 +51,21 @@ namespace IPSwitch_PatchMaker
 						   patchedData   = patchedSection.DecompressSection();
 
                     for (int index = 0; index < patchedData.Length; index++)
-                    if (patchedData[index] != unpatchedData[index])
-                    {
-                        offset = $"{index:X8}";
-                        patch = $"{patchedData[index]:X2}";
-
-                        //get the last index
-                        lastindex = index - 1;
-
-                        if (!apply && index - 1 == lastindex)
+                        if (patchedData[index] != unpatchedData[index])
                         {
-                            fullpatch = string.Empty;
-                            fulloffset = offset;
-                            apply = true;
-                        }
+                            offset = $"{index:X8}";
+                            patch = $"{patchedData[index]:X2}";
 
-                        if (index - 1 == lastindex)
+                        patcharraylist.Add($"{offset} {patch}");
+                        }
+                        else
                         {
-                            fullpatch += patch;
-                            combine = combine + 1; 
+                            Console.WriteLine("No diffrences found.");
+                            break;
                         }
-
-                        if (!apply && combine == 0) patcharraylist.Add($"{offset} {patch}");
-
-                        //check if apply is true and index is lastindex
-                        combinelast = 1 - combine;
-						
-                        if (apply && combine > combinelast)
-                        {
-                            //apply combined offset & patch and reset
-                            patcharraylist.Add($"{fulloffset} {fullpatch}");
-                            apply = false;
-                            fullpatch = "";
-                            fulloffset = "";
-                            combine = 0;
-                        }
-                    }
                 }
-				
                 File.WriteAllLines(save.FullName, patcharraylist);
+                Console.WriteLine($"Done, {patcharraylist.Count - 2} were different.");
             }
         }
     }

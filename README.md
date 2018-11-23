@@ -4,4 +4,3 @@ Creates a plain text patch for use with [IPSwitch](https://github.com/3096/ipswi
 
 # Known Issues
 * Can only print 1 byte for an offset
-* Expects NSO sizes to be the same
