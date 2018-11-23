@@ -55,8 +55,7 @@ namespace IPSwitch_PatchMaker
                         {
                             offset = $"{index:X8}";
                             patch = $"{patchedData[index]:X2}";
-
-                        patcharraylist.Add($"{offset} {patch}");
+                            patcharraylist.Add($"{offset} {patch}");
                         }
                         else
                         {
