@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using static LibHac.Nso;
+using LibHac.IO;
 
 namespace IPSwitch_PatchMaker
 {
@@ -25,8 +26,8 @@ namespace IPSwitch_PatchMaker
             using (var patchedstream = File.OpenRead(patchednsoPath.FullName))
             using (var unpatchedstream = File.OpenRead(unpatchednsoPath.FullName))
             {
-                var unpatchedNso = new Nso(unpatchedstream);
-                var patchedNso = new Nso(patchedstream);
+                var unpatchedNso = new Nso(unpatchedstream.AsStorage());
+                var patchedNso = new Nso(patchedstream.AsStorage());
 
                 if (patchedNso.Sections.Length != unpatchedNso.Sections.Length)
                 {
