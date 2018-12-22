@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2050
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPSwitch-PatchMaker", "IPSwitch-PatchMaker.csproj", "{8E7B2347-C690-4642-8EFE-C3294ADF6679}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPSwitch PatchMaker", "IPSwitch PatchMaker.csproj", "{8E7B2347-C690-4642-8EFE-C3294ADF6679}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
